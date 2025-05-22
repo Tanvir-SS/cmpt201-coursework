@@ -1,0 +1,10 @@
+// Lab1 Take input/tokenize it
+// Date: May 5 2025
+// Author: Tanvir Shergill
+#include <stdio.h>
+
+int main(void){
+  printf("Hello");
+  return 0;
+
+}
