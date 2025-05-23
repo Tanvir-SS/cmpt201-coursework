@@ -9,15 +9,20 @@ int main(void) {
   size_t len = 0;
   ssize_t read;
   char *token = NULL;
-
+  char *saveptr;
   printf("Please enter some text: ");
+
   read = getline(&text, &len, stdin);
+  if (read == -1) {
+    perror("getline failed");
+    return 0;
+  }
   // printf("%s", text);
-  token = strtok(text, " ");
+  token = strtok_r(text, " ", &saveptr);
   printf("Tokens: \n");
   while (token) {
     printf("%s\n", token);
-    token = strtok(NULL, " ");
+    token = strtok_r(NULL, " ", &saveptr);
   }
   free(token);
   free(text);
