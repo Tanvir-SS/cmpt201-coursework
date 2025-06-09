@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define HISTORY_SIZE 5
+
+int main(void) {
+    char *history[HISTORY_SIZE] = {NULL}; // Array of pointers to last 5 lines
+    int current = 0; // Index in the circular buffer
+    int count = 0;   // Total number of lines entered so far
+
+    while (1) {
+        printf("Enter input: ");
+        char *line = NULL;
+        size_t len = 0;
+        ssize_t read = getline(&line, &len, stdin);
+        if (read == -1) {
+            perror("getline failed");
+            break;
+        }
+
+        // Remove newline at end, if present
+        if (line[read-1] == '\n') {
+            line[read-1] = '\0';
+        }
+
+        // Free old entry at current position if not NULL
+        if (history[current] != NULL) {
+            free(history[current]);
+        }
+        history[current] = line; // Save pointer to this line
+        current = (current + 1) % HISTORY_SIZE;
+        count++;
+
+        if (strcmp(line, "print") == 0) {
+            // Print up to HISTORY_SIZE previous lines, oldest to newest
+            int n = (count < HISTORY_SIZE) ? count : HISTORY_SIZE;
+            int start = (count < HISTORY_SIZE) ? 0 : current;
+            for (int i = 0; i < n; i++) {
+                int idx = (start + i) % HISTORY_SIZE;
+                printf("%s\n", history[idx]);
+            }
+        }
+    }
+
+    // Free any allocated memory before exit
+    for (int i = 0; i < HISTORY_SIZE; i++) {
+        free(history[i]);
+    }
+    return 0;
+}
+
