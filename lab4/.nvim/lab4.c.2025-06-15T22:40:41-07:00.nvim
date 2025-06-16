@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <stdint.h>
+
+struct header { 
+    uint64_t size; 
+    struct header* next; 
+};
+
+int main(void){
+
+    void * heapBlock = sbrk(256); 
+
+    struct header *block1 = (struct header *) heapBlock;
+    struct header *block2 = (struct header *) ((char *)heapBlock + 128);
+
+    block1 -> size = 128; 
+    block1 -> next = NULL; 
+
+    block2 -> size = 128;
+    block2-> next = block1;
+
+    char *data1 = (char *)(block1 + 1);
+    char *data2 = (char *)(block2 + 1);
+    for (int i = 0; i < (128 - sizeof(struct header)); i++) {
+        data1[i] = 0;      
+        data2[i] = 1;      
+    }
+
+    printf("first block:  %p\n", (void *)block1);
+    printf("second block: %p\n", (void *)block2);
+    printf("first block size: %llu\n", block1->size);
+    printf("first block next: %p\n", (void *)block1->next);
+    printf("second block size: %llu\n", block2->size);
+    printf("second block next: %p\n", (void *)block2->next);
+
+   
+    printf("first block data: ");
+    for (size_t i = 0; i < 8; i++) { 
+        
+        printf("%d ", data1[i]); 
+    }
+
+    if (128 > 8){ 
+    
+        printf("..");
+    }
+
+    printf("\n");
+
+    printf("second block data: ");
+    for (size_t i = 0; i < 8; i++) {
+
+        printf("%d ", data2[i]); 
+    }
+    if (128 > 8){
+
+        printf("..");
+    }
+    printf("\n");
+
+    return 0;
+}
