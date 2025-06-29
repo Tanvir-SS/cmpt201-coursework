@@ -1,0 +1,82 @@
+#include <assert.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/*–– Macros ––*/
+#define ASSERT(expr)                                     \
+    do {                                                 \
+        if (!(expr)) {                                   \
+            fprintf(stderr,                              \
+                    "Assertion failed: %s\n"             \
+                    "  File: %s, Line: %d\n",            \
+                    #expr, __FILE__, __LINE__);          \
+            exit(EXIT_FAILURE);                          \
+        }                                                \
+    } while (0)
+
+#define TEST(expr)                                       \
+    do {                                                 \
+        if (!(expr)) {                                   \
+            fprintf(stderr,                              \
+                    "Test failed: %s\n", #expr);         \
+            exit(EXIT_FAILURE);                          \
+        } else {                                         \
+            printf("Test passed: %s\n", #expr);          \
+        }                                                \
+    } while (0)
+
+/*–– Sorted singly-linked list ADT ––*/
+typedef struct node {
+    uint64_t      data;
+    struct node  *next;
+} node_t;
+
+typedef struct {
+    node_t      *head;
+    uint64_t     sum;
+} list_t;
+
+/* Initialize an empty list */
+static void list_init(list_t *lst) {
+    lst->head = NULL;
+    lst->sum  = 0;
+}
+
+/* Insert a new element in sorted ascending order */
+static void list_insert_sorted(list_t *lst, uint64_t value) {
+    node_t *new_node = malloc(sizeof *new_node);
+    ASSERT(new_node != NULL);
+
+    new_node->data = value;
+    new_node->next = NULL;
+
+    node_t **pp = &lst->head;
+    while (*pp != NULL && (*pp)->data < value) {
+        pp = &(*pp)->next;
+    }
+    new_node->next = *pp;
+    *pp              = new_node;
+
+    lst->sum += value;
+}
+
+/* Return the zero-based index of the first matching element, or –1 */
+static int list_index_of(const list_t *lst, uint64_t value) {
+    node_t *curr = lst->head;
+    int      idx  = 0;
+    while (curr) {
+        if (curr->data == value) {
+            return idx;
+        }
+        curr = curr->next;
+        idx++;
+    }
+    return -1;
+}
+
+/* Compute the sum of all elements by walking the list */
+static uint64_t list_calculate_sum(const list_t *lst) {
+    uint64_t s   = 0;
+    node_t  *cur = lst->head;
+    while (cur) {
