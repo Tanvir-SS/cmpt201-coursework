@@ -45,13 +45,13 @@ int main() {
       printf("Invalid input. Please enter an integer or 'end' to finish.\n");
     }
   }
-
+  
   IntermediateInput mapped_results[MAX_INPUT] = {0};
 
   for (int i = 0; i < input_size; i++) {
     map(&input_data[i], &mapped_results[i]);
   }
-
+  
   Output output_results[MAX_INPUT] = {0};
   int result_count = 0;
 
@@ -79,7 +79,7 @@ void groupByKey(IntermediateInput *input, Output *output, int *result_count) {
       output[i].count++;
       return;
     }
-  }
+}
   output[*result_count].doubled_value = input->doubled_value;
   output[*result_count].line_numbers[0] = input->line_number;
   output[*result_count].count = 1;
