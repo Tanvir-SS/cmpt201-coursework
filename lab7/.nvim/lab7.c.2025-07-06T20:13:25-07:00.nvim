@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_INPUT   100
+#define LINE_BUF    64
+
+typedef struct {
+    int  line_no;
+    int  value;
+} Input;
+
+typedef struct {
+    int line_no;
+    int doubled;
+} Mapped;
+
+typedef struct {
+    int  doubled;
+    int  lines[MAX_INPUT];
+    int  count;
+} Grouped;
+
+int  readInputs(Input inputs[]);
+void mapPhase(const Input inputs[], Mapped mapped[], int n);
+void groupPhase(const Mapped mapped[], int n, Grouped groups[], int *gcount);
+void reducePhase(const Grouped groups[], int gcount);
+
+int main(void) {
+    Input    inputs[MAX_INPUT];
+    Mapped   mapped[MAX_INPUT];
+    Grouped  groups[MAX_INPUT];
+    int      nInputs = readInputs(inputs);
+    int      nGroups = 0;
+
+    mapPhase(inputs, mapped,   nInputs);
+    groupPhase(mapped,  nInputs, groups, &nGroups);
+    reducePhase(groups,  nGroups);
+
+    return 0;
+}
+
+int readInputs(Input inputs[]) {
+    char line[LINE_BUF];
+    int  count = 0;
+
+    printf("Enter integers, one per line. Type 'end' to finish:\n");
+    while (count < MAX_INPUT && fgets(line, LINE_BUF, stdin)) {
+        if (strncmp(line, "end", 3) == 0) {
+            break;
+        }
+        char *endptr;
+        long val = strtol(line, &endptr, 10);
+        if (endptr != line && (*endptr == '\n' || *endptr == '\0')) {
+            inputs[count].line_no = count + 1;
+            inputs[count].value   = (int) val;
+            count++;
+        } else {
+            printf("Invalid. Enter integer or 'end':\n");
+        }
+    }
+    return count;
+}
+
+void mapPhase(const Input inputs[], Mapped mapped[], int n) {
+    for (int i = 0; i < n; i++) {
+        mapped[i].line_no = inputs[i].line_no;
+        mapped[i].doubled = inputs[i].value * 2;
+    }
+}
+
+void groupPhase(const Mapped mapped[], int n, Grouped groups[], int *gcount) {
+    for (int i = 0; i < n; i++) {
+        int dbl = mapped[i].doubled;
+        bool found = false;
+
+        for (int j = 0; j < *gcount; j++) {
+            if (groups[j].doubled == dbl) {
+                groups[j].lines[ groups[j].count++ ] = mapped[i].line_no;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            groups[*gcount].doubled = dbl;
+            groups[*gcount].count   = 1;
+            groups[*gcount].lines[0] = mapped[i].line_no;
+            (*gcount)++;
+        }
+    }
+}
+
+void reducePhase(const Grouped groups[], int gcount) {
+    for (int i = 0; i < gcount; i++) {
+        printf("(%d, [", groups[i].doubled);
+        for (int j = 0; j < groups[i].count; j++) {
+            printf("%d", groups[i].lines[j]);
+            if (j < groups[i].count - 1) {
+                printf(", ");
+            }
+        }
+        printf("])\n");
+    }
+}
